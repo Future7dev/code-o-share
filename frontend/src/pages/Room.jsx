@@ -1,0 +1,53 @@
+import React, { useEffect, useState, useRef } from 'react';
+import { useLocation, useNavigate, useParams, Navigate } from 'react-router-dom';
+import { io } from 'socket.io-client';
+import toast from 'react-hot-toast';
+import CodeEditor from '../components/CodeEditor';
+import Chat from '../components/Chat';
+
+export default function Room() {
+  const { roomId } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const socketRef = useRef(null);
+  const [clients, setClients] = useState([]);
+
+  // Optional: Redirect if no username is found in location state
+  // if (!location.state) return <Navigate to="/" />;
+
+  useEffect(() => {
+    const initSocket = async () => {
+      socketRef.current = io('http://localhost:5000', {
+        transports: ['websocket'],
+      });
+
+      socketRef.current.on('connect_error', (err) => handleErrors(err));
+      socketRef.current.on('connect_failed', (err) => handleErrors(err));
+
+      function handleErrors(e) {
+        toast.error('Socket connection failed, try again later.');
+        navigate('/');
+      }
+
+      socketRef.current.emit('join-room', {
+        roomId,
+        username: location.state?.username || 'Guest',
+      });
+    };
+
+    initSocket();
+
+    return () => {
+      if (socketRef.current) socketRef.current.disconnect();
+    };
+  }, [roomId, location.state?.username, navigate]);
+
+  return (
+    <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
+      {/* Editor takes up 70% of the screen */}
+      <CodeEditor socketRef={socketRef} roomId={roomId} />
+      {/* Chat takes up 30% of the screen */}
+      <Chat socketRef={socketRef} roomId={roomId} username={location.state?.username || 'Guest'} />
+    </div>
+  );
+}
