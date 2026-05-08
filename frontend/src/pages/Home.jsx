@@ -10,7 +10,7 @@ export default function Home() {
   const { user, logout } = useAuth();
 
   // Protect route
-  // if (!user) return <Navigate to="/login" />;
+  if (!user) return <Navigate to="/login" />;
 
   const createNewRoom = (e) => {
     e.preventDefault();

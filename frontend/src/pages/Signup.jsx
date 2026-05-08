@@ -18,7 +18,7 @@ export default function Signup() {
       const response = await axios.post('http://localhost:5000/api/auth/signup', { name, email, password });
       login(response.data.user);
       toast.success('Account created successfully!');
-      navigate('/');
+      navigate('/login');
     } catch (error) {
       toast.error('Signup failed!');
     }
