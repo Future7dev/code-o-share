@@ -11,18 +11,21 @@ export default function Room() {
   const navigate = useNavigate();
   const socketRef = useRef(null);
   const [clients, setClients] = useState([]);
+  const [isSocketReady, setIsSocketReady] = useState(false);
 
   // Optional: Redirect if no username is found in location state
-  // if (!location.state) return <Navigate to="/" />;
+  if (!location.state) return <Navigate to="/" />;
 
   useEffect(() => {
     const initSocket = async () => {
-      socketRef.current = io('http://localhost:5000', {
-        transports: ['websocket'],
-      });
+      socketRef.current = io('http://localhost:5000');
+      setIsSocketReady(true);
 
       socketRef.current.on('connect_error', (err) => handleErrors(err));
       socketRef.current.on('connect_failed', (err) => handleErrors(err));
+      socketRef.current.on('connect', () => {
+      console.log('Connected:', socketRef.current.id);
+    });
 
       function handleErrors(e) {
         toast.error('Socket connection failed, try again later.');
@@ -41,13 +44,14 @@ export default function Room() {
       if (socketRef.current) socketRef.current.disconnect();
     };
   }, [roomId, location.state?.username, navigate]);
+  
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
       {/* Editor takes up 70% of the screen */}
-      <CodeEditor socketRef={socketRef} roomId={roomId} />
+      {isSocketReady && <CodeEditor socketRef={socketRef} roomId={roomId} />}
       {/* Chat takes up 30% of the screen */}
-      <Chat socketRef={socketRef} roomId={roomId} username={location.state?.username || 'Guest'} />
+      {isSocketReady && <Chat socketRef={socketRef} roomId={roomId} username={location.state?.username || 'Guest'} />}
     </div>
   );
 }

@@ -9,19 +9,22 @@ export default function CodeEditor({ socketRef, roomId }) {
   const [output, setOutput] = useState('');
 
   useEffect(() => {
-    if (socketRef.current) {
-      socketRef.current.on('code-change', ({ code: newCode }) => {
-        if (newCode !== null) {
-          setCode(newCode);
-        }
-      });
-    }
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.off('code-change');
+    if (!socketRef.current) return;
+
+    const handleCodeUpdate = ({ code: newCode }) => {
+      if (newCode !== null) {
+        setCode(newCode);
       }
     };
-  }, [socketRef.current]);
+
+    socketRef.current.on('code-update', handleCodeUpdate);
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off('code-update', handleCodeUpdate);
+      }
+    };
+  }, [socketRef]);
 
   const handleEditorChange = (value) => {
     setCode(value);
@@ -39,28 +42,46 @@ export default function CodeEditor({ socketRef, roomId }) {
   };
 
   const runCode = async () => {
-    const languageIds = { javascript: 63, python: 71, java: 71, cpp: 62 }; // Example Judge0 IDs
-    
-    try {
-      setOutput('Executing...');
-      // Example request to Judge0 RapidAPI or local instance
-      const response = await axios.post('https://judge0-ce.p.rapidapi.com/submissions', {
-        source_code: code,
-        language_id: languageIds[language] || 63,
-      }, {
-        headers: {
-          'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
-          'X-RapidAPI-Key': 'YOUR_RAPIDAPI_KEY', // REPLACE WITH YOUR KEY
-          'Content-Type': 'application/json'
-        },
-        params: { wait: true }
-      });
-      
-      setOutput(response.data.stdout || response.data.stderr || response.data.compile_output);
-    } catch (err) {
-      setOutput('Execution Error.');
-    }
+  const languageIds = {
+    javascript: 63,
+    python: 71,
+    java: 62,
+    cpp: 54
   };
+
+  try {
+    setOutput("Executing...");
+
+    const response = await axios.post(
+      "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true",
+      {
+        source_code: code,
+        language_id: languageIds[language],
+        stdin: ""
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-RapidAPI-Key": "043798940emsh81bd4b52a13e11fp122305jsn1f7b710ce565",
+          "X-RapidAPI-Host": "judge029.p.rapidapi.com"
+        }
+      }
+    );
+
+    const result = response.data;
+
+    setOutput(
+      result.stdout ||
+      result.stderr ||
+      result.compile_output ||
+      "No Output"
+    );
+
+  } catch (error) {
+    console.error(error);
+    setOutput("Execution Error");
+  }
+};
 
   return (
     <div style={{ flex: 0.7, display: 'flex', flexDirection: 'column' }}>
