@@ -1,13 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 export default function Home() {
   const [roomId, setRoomId] = useState('');
+  const [savedCodes, setSavedCodes] = useState([]);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  useEffect(() => {
+    if (user?.name) {
+      // Connect this to your future backend API to fetch saved codes
+      axios.get(`http://localhost:5000/api/code/get-code/${user.name}`)
+        .then((response) => {
+          console.log('Fetched saved codes:', response.data);
+          const fetchedCodes = response.data?.codes || response.data;
+          setSavedCodes(Array.isArray(fetchedCodes) ? fetchedCodes : []);
+        })
+        .catch((error) => {
+          console.error('Failed to fetch saved codes:', error);
+        });
+    }
+  }, [user]);
 
   // Protect route
   if (!user) return <Navigate to="/login" />;
@@ -24,6 +41,10 @@ export default function Home() {
     navigate(`/room/${roomId}`, { state: { username: user?.name || 'Guest' } });
   };
 
+  const joinSavedRoom = (item) => {
+    navigate(`/room/${item.roomId}`, { state: { username: user?.name || 'Guest', code: item.code } });
+  };
+
   return (
     <div style={styles.pageContainer}>
       {/* Top Navigation */}
@@ -32,6 +53,8 @@ export default function Home() {
         <button onClick={logout} style={styles.logoutBtn}>Logout</button>
       </div>
 
+      {/* Main Content Area */}
+      <div style={styles.mainArea}>
       {/* Main Card */}
       <div style={styles.card}>
         <h1 style={styles.title}>Code-o-Share</h1>
@@ -58,6 +81,26 @@ export default function Home() {
           </a>
         </p>
       </div>
+      </div>
+
+      {/* Saved Code Corner */}
+      <div style={styles.sidebar}>
+        <h3 style={styles.sidebarTitle}>Saved Codes Corner</h3>
+        <div style={styles.savedCodesList}>
+          {Array.isArray(savedCodes) && savedCodes.length > 0 ? (
+            savedCodes.map((item, index) => (
+              <div key={item._id || index} style={styles.savedItem} onClick={() => joinSavedRoom(item)}>
+                <div style={styles.savedItemHeader}>Room: {item.roomId}</div>
+                <div style={styles.savedItemDate}>
+                  {new Date(item.updatedAt || item.createdAt || Date.now()).toLocaleString()}
+                </div>
+              </div>
+            ))
+          ) : (
+            <p style={styles.emptyText}>No saved codes yet.</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -65,8 +108,6 @@ export default function Home() {
 const styles = {
   pageContainer: {
     display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
     height: '100vh',
     width: '100%',
     backgroundColor: '#121212',
@@ -74,13 +115,20 @@ const styles = {
     color: '#fff',
     position: 'relative'
   },
+  mainArea: {
+    flex: 1,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   topNav: {
     position: 'absolute',
     top: '20px',
-    right: '30px',
+    right: '330px',
     display: 'flex',
     alignItems: 'center',
-    gap: '20px'
+    gap: '20px',
+    zIndex: 10
   },
   welcomeText: {
     fontSize: '15px',
@@ -95,6 +143,7 @@ const styles = {
     cursor: 'pointer',
     fontWeight: '600',
     transition: 'background-color 0.2s ease',
+    marginRight: '20px'
   },
   card: {
     backgroundColor: '#1e1e1e',
@@ -157,5 +206,56 @@ const styles = {
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'color 0.2s'
+  },
+  sidebar: {
+    width: '300px',
+    backgroundColor: '#1e1e1e',
+    borderLeft: '1px solid #333',
+    padding: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    boxShadow: '-4px 0 15px rgba(0,0,0,0.5)',
+    zIndex: 5
+  },
+  sidebarTitle: {
+    margin: '0 0 20px 0',
+    fontSize: '20px',
+    fontWeight: '600',
+    color: '#e0e0e0',
+    borderBottom: '1px solid #333',
+    paddingBottom: '15px'
+  },
+  savedCodesList: {
+    flex: 1,
+    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+    paddingRight: '5px'
+  },
+  emptyText: {
+    color: '#858585',
+    fontSize: '14px',
+    textAlign: 'center',
+    marginTop: '20px',
+    fontStyle: 'italic'
+  },
+  savedItem: {
+    backgroundColor: '#2d2d2d',
+    padding: '15px',
+    borderRadius: '8px',
+    border: '1px solid #3c3c3c',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s, transform 0.1s',
+  },
+  savedItemHeader: {
+    fontSize: '15px',
+    fontWeight: '600',
+    color: '#3794ff',
+    marginBottom: '5px'
+  },
+  savedItemDate: {
+    fontSize: '12px',
+    color: '#a0a0a0'
   }
 };

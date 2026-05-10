@@ -61,18 +61,13 @@ export default function Room() {
   }, [roomId, location.state?.username, navigate]);
   
   const handleLeaveRoom = () => {
-     socketRef.current.emit('disconnect-user', {
-          roomId,
-          username: location.state?.username || 'Guest',
-        });
-    socketRef.current.disconnect();
     navigate('/');
   };
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
       {/* Editor takes up 70% of the screen */}
-      {isSocketReady && <CodeEditor socketRef={socketRef} roomId={roomId} username={location.state?.username || 'Guest'} onLeaveRoom={handleLeaveRoom} />}
+      {isSocketReady && <CodeEditor socketRef={socketRef} roomId={roomId} username={location.state?.username || 'Guest'} onLeaveRoom={handleLeaveRoom} initialCode={location.state?.code} />}
       {/* Chat takes up 30% of the screen */}
       {isSocketReady && <Chat socketRef={socketRef} roomId={roomId} username={location.state?.username || 'Guest'} />}
     </div>

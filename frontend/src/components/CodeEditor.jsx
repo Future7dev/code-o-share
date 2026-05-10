@@ -3,8 +3,8 @@ import Editor from '@monaco-editor/react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-export default function CodeEditor({ socketRef, roomId, username, onLeaveRoom }) {
-  const [code, setCode] = useState('// Write your code here');
+export default function CodeEditor({ socketRef, roomId, username, onLeaveRoom, initialCode }) {
+  const [code, setCode] = useState(initialCode || '// Write your code here');
   const [language, setLanguage] = useState('javascript');
   const [output, setOutput] = useState('');
 
@@ -122,8 +122,8 @@ export default function CodeEditor({ socketRef, roomId, username, onLeaveRoom })
   const saveCode = async () => {
     try {
       // Connect this to your future backend API
-      await axios.post('http://localhost:5000/api/code/save', { roomId, code, language });
-      toast.success('Code saved to MongoDB successfully!');
+      await axios.post('http://localhost:5000/api/code/save-code', { roomId, code, username });
+      toast.success('Code saved  successfully!');
     } catch (error) {
       toast.error('Failed to save code.');
     }
