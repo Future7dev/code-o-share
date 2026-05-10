@@ -70,6 +70,10 @@ io.on('connection', (socket) => {
   userSocketMap[socket.id] = username;
 
   socket.join(roomId);
+  socket.in(roomId).emit('user-connected', {
+    username,
+  })
+
 
   if (roomCodes[roomId]) {
 
@@ -93,7 +97,12 @@ io.on('connection', (socket) => {
 
 });
 
+socket.on('disconnect-user', ({ roomId, username }) => {
 
+  socket.in(roomId).emit('disconnected-user', {
+    username,
+  })
+});
 
   // CODE CHANGE
 

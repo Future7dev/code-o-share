@@ -14,7 +14,7 @@ export default function Home() {
 
   const createNewRoom = (e) => {
     e.preventDefault();
-    const id = uuidV4();
+    const id = uuidV4().slice(0, 8); 
     setRoomId(id);
     toast.success('Created a new room');
   };

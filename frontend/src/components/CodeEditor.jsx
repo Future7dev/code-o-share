@@ -3,7 +3,7 @@ import Editor from '@monaco-editor/react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-export default function CodeEditor({ socketRef, roomId, username }) {
+export default function CodeEditor({ socketRef, roomId, username, onLeaveRoom }) {
   const [code, setCode] = useState('// Write your code here');
   const [language, setLanguage] = useState('javascript');
   const [output, setOutput] = useState('');
@@ -297,6 +297,29 @@ const styles = {
   },
 
 
+  // ================= LEAVE BUTTON =================
+
+  leaveButton: {
+    padding: '10px 18px',
+
+    borderRadius: '10px',
+
+    border: 'none',
+
+    background: 'linear-gradient(135deg, #dc2626, #b91c1c)',
+
+    color: '#fff',
+
+    fontWeight: '600',
+
+    fontSize: '14px',
+
+    cursor: 'pointer',
+
+    transition: 'all 0.25s ease',
+
+    boxShadow: '0 4px 12px rgba(220,38,38,0.4)'
+  },
 
   // ================= EDITOR =================
 
@@ -397,6 +420,13 @@ outputText: {
         style={styles.runButton}
       >
         ▶ Run Code
+      </button>
+
+      <button
+        onClick={onLeaveRoom}
+        style={styles.leaveButton}
+      >
+        Leave Room
       </button>
 
     </div>

@@ -26,6 +26,14 @@ export default function Room() {
       socketRef.current.on('connect', () => {
       console.log('Connected:', socketRef.current.id);
     });
+    socketRef.current.on('user-connected', ({ username }) => {
+      console.log(`${username} joined the room`);
+      toast.success(`${username} joined the room`);
+    });
+    socketRef.current.on('disconnected-user', ({ username }) => {
+      toast.success(`${username} left the room`);
+    });
+  
 
       function handleErrors(e) {
         toast.error('Socket connection failed, try again later.');
@@ -41,15 +49,30 @@ export default function Room() {
     initSocket();
 
     return () => {
-      if (socketRef.current) socketRef.current.disconnect();
+      if (socketRef.current){
+        socketRef.current.emit('disconnect-user', {
+          roomId,
+          username: location.state?.username || 'Guest',
+        });
+      socketRef.current.disconnect();
+
+      } 
     };
   }, [roomId, location.state?.username, navigate]);
   
+  const handleLeaveRoom = () => {
+     socketRef.current.emit('disconnect-user', {
+          roomId,
+          username: location.state?.username || 'Guest',
+        });
+    socketRef.current.disconnect();
+    navigate('/');
+  };
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
       {/* Editor takes up 70% of the screen */}
-      {isSocketReady && <CodeEditor socketRef={socketRef} roomId={roomId} username={location.state?.username || 'Guest'} />}
+      {isSocketReady && <CodeEditor socketRef={socketRef} roomId={roomId} username={location.state?.username || 'Guest'} onLeaveRoom={handleLeaveRoom} />}
       {/* Chat takes up 30% of the screen */}
       {isSocketReady && <Chat socketRef={socketRef} roomId={roomId} username={location.state?.username || 'Guest'} />}
     </div>
