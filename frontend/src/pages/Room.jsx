@@ -49,7 +49,7 @@ export default function Room() {
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw' }}>
       {/* Editor takes up 70% of the screen */}
-      {isSocketReady && <CodeEditor socketRef={socketRef} roomId={roomId} />}
+      {isSocketReady && <CodeEditor socketRef={socketRef} roomId={roomId} username={location.state?.username || 'Guest'} />}
       {/* Chat takes up 30% of the screen */}
       {isSocketReady && <Chat socketRef={socketRef} roomId={roomId} username={location.state?.username || 'Guest'} />}
     </div>

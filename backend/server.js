@@ -107,6 +107,10 @@ socket.on('code-change', ({ roomId, code }) => {
   });
 
 });
+socket.on('cursor-change', (data) => {
+  socket.broadcast.to(data.roomId).emit('cursor-change', data);
+});
+
 
 
 

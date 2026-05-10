@@ -1,12 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-export default function CodeEditor({ socketRef, roomId }) {
+export default function CodeEditor({ socketRef, roomId, username }) {
   const [code, setCode] = useState('// Write your code here');
   const [language, setLanguage] = useState('javascript');
   const [output, setOutput] = useState('');
+
+  const editorRef = useRef(null);
+  const monacoRef = useRef(null);
+  const decorationsRef = useRef({}); // Map decorations by username
+
+  const getUserColor = (name) => {
+    const colors = ['#FF5733', '#33FF57', '#3357FF', '#F033FF', '#33FFF0', '#FF33A1', '#FFC733'];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return colors[Math.abs(hash) % colors.length];
+  };
+
+  const handleEditorMount = (editor, monaco) => {
+    editorRef.current = editor;
+    monacoRef.current = monaco;
+
+    editor.onDidChangeCursorSelection((e) => {
+      socketRef.current.emit('cursor-change', {
+        roomId,
+        username,
+        selection: e.selection
+      });
+    });
+  };
 
   useEffect(() => {
     if (!socketRef.current) return;
@@ -17,14 +43,76 @@ export default function CodeEditor({ socketRef, roomId }) {
       }
     };
 
+    const handleCursorChange = ({ username: sender, selection }) => {
+      if (sender === username || !editorRef.current || !monacoRef.current) return;
+
+      const color = getUserColor(sender);
+      const safeSender = sender.replace(/[^a-zA-Z0-9]/g, '_');
+      
+      let styleEl = document.getElementById(`cursor-style-${safeSender}`);
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = `cursor-style-${safeSender}`;
+        styleEl.innerHTML = `
+          .remote-cursor-${safeSender} {
+            border-left: 2px solid ${color} !important;
+            box-sizing: border-box;
+          }
+          .remote-cursor-${safeSender}::before {
+            content: '${sender}';
+            position: absolute;
+            top: -18px;
+            left: 0;
+            background-color: ${color};
+            color: white;
+            font-size: 10px;
+            padding: 1px 4px;
+            border-radius: 2px;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 100;
+          }
+          .remote-selection-${safeSender} {
+            background-color: ${color}40;
+          }
+        `;
+        document.head.appendChild(styleEl);
+      }
+
+      // Apply changes with a slight delay to allow incoming code changes to process first
+      setTimeout(() => {
+        if (!editorRef.current || !monacoRef.current) return;
+
+        const newDecorations = [
+          {
+            range: new monacoRef.current.Range(selection.positionLineNumber, selection.positionColumn, selection.positionLineNumber, selection.positionColumn),
+            options: { className: `remote-cursor-${safeSender}`, stickiness: 1 } // stickiness 1 = NeverGrowsWhenTypingAtEdges
+          }
+        ];
+
+        const selectionRange = new monacoRef.current.Range(selection.startLineNumber, selection.startColumn, selection.endLineNumber, selection.endColumn);
+        if (!selectionRange.isEmpty()) {
+          newDecorations.push({
+            range: selectionRange,
+            options: { className: `remote-selection-${safeSender}`, stickiness: 1 }
+          });
+        }
+
+        const oldDecorations = decorationsRef.current[sender] || [];
+        decorationsRef.current[sender] = editorRef.current.deltaDecorations(oldDecorations, newDecorations);
+      }, 10);
+    };
+
     socketRef.current.on('code-update', handleCodeUpdate);
+    socketRef.current.on('cursor-change', handleCursorChange);
 
     return () => {
       if (socketRef.current) {
         socketRef.current.off('code-update', handleCodeUpdate);
+        socketRef.current.off('cursor-change', handleCursorChange);
       }
     };
-  }, [socketRef]);
+  }, [socketRef, username]);
 
   const handleEditorChange = (value) => {
     setCode(value);
@@ -214,7 +302,8 @@ const styles = {
 
   editorWrapper: {
     flex: 1,
-    overflow: 'hidden'
+    overflow: 'hidden',
+    
   },
   outputContainer: {
   height: '200px',
@@ -317,10 +406,12 @@ outputText: {
       <div style={styles.editorWrapper}>
         <Editor
           height="100%"
+          
           theme="vs-dark"
           language={language}
           value={code}
           onChange={handleEditorChange}
+          onMount={handleEditorMount}
         />
       </div>
 
