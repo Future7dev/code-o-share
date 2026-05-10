@@ -12,6 +12,7 @@ const app = express();
 
 // Create HTTP server
 const server = http.createServer(app);
+const roomCodes = {};
 
 
 // Create Socket.IO server
@@ -62,40 +63,50 @@ io.on('connection', (socket) => {
 
   console.log('User connected:', socket.id);
 
-
+  
   // JOIN ROOM
   socket.on('join-room', ({ roomId, username }) => {
 
-    userSocketMap[socket.id] = username;
+  userSocketMap[socket.id] = username;
 
-    socket.join(roomId);
+  socket.join(roomId);
 
-    const clients = getAllConnectedClients(roomId);
+  if (roomCodes[roomId]) {
 
-    // Notify everyone in room
-    clients.forEach(({ socketId }) => {
-
-      io.to(socketId).emit('joined', {
-        clients,
-        username,
-        socketId: socket.id
-      });
-
+    socket.emit('code-update', {
+      code: roomCodes[roomId]
     });
 
-    console.log(`${username} joined room ${roomId}`);
+  }
+
+  const clients = getAllConnectedClients(roomId);
+
+  clients.forEach(({ socketId }) => {
+
+    io.to(socketId).emit('joined', {
+      clients,
+      username,
+      socketId: socket.id
+    });
+
   });
+
+});
 
 
 
   // CODE CHANGE
-  socket.on('code-change', ({ roomId, code }) => {
 
-    socket.in(roomId).emit('code-update', {
-      code
-    });
 
+socket.on('code-change', ({ roomId, code }) => {
+
+  roomCodes[roomId] = code;
+
+  socket.in(roomId).emit('code-update', {
+    code
   });
+
+});
 
 
 

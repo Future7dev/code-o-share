@@ -5,23 +5,27 @@ export default function Chat({ socketRef, roomId, username }) {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    if (socketRef.current) {
-      socketRef.current.on('receive-message', ({ username: sender, message: text }) => {
+    const handleReceiveMessage = ({ username: sender, message: text }) => {
+      if (sender !== username) {
         setMessages((prev) => [...prev, { sender, text }]);
-      });
+      }
+    };
+
+    if (socketRef.current) {
+      socketRef.current.on('receive-message', handleReceiveMessage);
     }
     return () => {
       if (socketRef.current) {
-        socketRef.current.off('receive-message');
+        socketRef.current.off('receive-message', handleReceiveMessage);
       }
     };
-  }, [socketRef.current]);
+  }, [socketRef, username]);
 
   const sendMessage = (e) => {
     e.preventDefault();
     if (message.trim()) {
       socketRef.current.emit('send-message', { roomId, username, message });
-      setMessages((prev) => [...prev, { sender: 'You', text: message }]);
+       setMessages((prev) => [...prev, { sender: username, text: message }]);
       setMessage('');
     }
   };
@@ -32,11 +36,11 @@ export default function Chat({ socketRef, roomId, username }) {
       
       <div style={{ flex: 1, padding: '10px', overflowY: 'auto' }}>
         {messages.map((msg, index) => (
-          <div key={index} style={{ marginBottom: '10px', textAlign: msg.sender === 'You' ? 'right' : 'left' }}>
+          <div key={index} style={{ marginBottom: '10px', textAlign: msg.sender === username ? 'right' : 'left' }}>
             <span style={{ fontSize: '0.8em', color: '#888' }}>{msg.sender}</span>
             <div style={{
-              background: msg.sender === 'You' ? '#007bff' : '#e5e5ea',
-              color: msg.sender === 'You' ? '#fff' : '#000',
+              background: msg.sender === username ? '#007bff' : '#e5e5ea',
+              color: msg.sender === username ? '#fff' : '#000',
               padding: '8px', borderRadius: '8px', display: 'inline-block'
             }}>
               {msg.text}

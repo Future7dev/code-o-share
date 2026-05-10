@@ -83,20 +83,238 @@ export default function CodeEditor({ socketRef, roomId }) {
   }
 };
 
+const styles = {
+
+  editorContainer: {
+    flex: 0.7,
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100vh',
+    background: '#1e1e1e',
+    overflow: 'hidden'
+  },
+
+  // ================= TOP BAR =================
+
+  topBar: {
+    position: 'sticky',
+    top: 0,
+    zIndex: 1000,
+
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+
+    padding: '14px 20px',
+
+    background: 'rgba(30, 30, 30, 0.95)',
+
+    backdropFilter: 'blur(10px)',
+
+    borderBottom: '1px solid #333',
+
+    boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
+  },
+
+  leftControls: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px'
+  },
+
+  rightControls: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px'
+  },
+
+
+
+  // ================= SELECT =================
+
+  select: {
+    padding: '10px 16px',
+
+    borderRadius: '10px',
+
+    border: '1px solid #444',
+
+    background: '#252526',
+
+    color: '#fff',
+
+    fontSize: '15px',
+
+    fontWeight: '500',
+
+    cursor: 'pointer',
+
+    outline: 'none',
+
+    transition: 'all 0.2s ease',
+
+    boxShadow: '0 2px 6px rgba(0,0,0,0.25)'
+  },
+
+
+
+  // ================= SAVE BUTTON =================
+
+  saveButton: {
+    padding: '10px 18px',
+
+    borderRadius: '10px',
+
+    border: 'none',
+
+    background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
+
+    color: '#fff',
+
+    fontWeight: '600',
+
+    fontSize: '14px',
+
+    cursor: 'pointer',
+
+    transition: 'all 0.25s ease',
+
+    boxShadow: '0 4px 12px rgba(37,99,235,0.4)'
+  },
+
+
+
+  // ================= RUN BUTTON =================
+
+  runButton: {
+    padding: '10px 18px',
+
+    borderRadius: '10px',
+
+    border: 'none',
+
+    background: 'linear-gradient(135deg, #16a34a, #15803d)',
+
+    color: '#fff',
+
+    fontWeight: '600',
+
+    fontSize: '14px',
+
+    cursor: 'pointer',
+
+    transition: 'all 0.25s ease',
+
+    boxShadow: '0 4px 12px rgba(22,163,74,0.4)'
+  },
+
+
+
+  // ================= EDITOR =================
+
+  editorWrapper: {
+    flex: 1,
+    overflow: 'hidden'
+  },
+  outputContainer: {
+  height: '200px',
+
+  background: '#1e1e1e',
+
+  color: '#00ff88',
+
+  padding: '14px',
+
+  borderTop: '1px solid #333',
+
+  overflowY: 'auto',
+
+  overflowX: 'auto',
+
+  textAlign: 'left',
+
+  fontFamily: 'Consolas, monospace',
+  margin: 0,
+
+  whiteSpace: 'pre-wrap',
+
+  wordBreak: 'break-word',
+
+  textAlign: 'left',
+
+  lineHeight: '1.5',
+
+  fontSize: '14px'
+},
+
+outputTitle: {
+  margin: '0 0 10px 0',
+
+  color: '#ffffff',
+
+  fontSize: '16px',
+
+  fontWeight: '600',
+
+  textAlign: 'left'
+},
+
+outputText: {
+  margin: 0,
+
+  whiteSpace: 'pre-wrap',
+
+  wordBreak: 'break-word',
+
+  textAlign: 'left',
+
+  lineHeight: '1.5',
+
+  fontSize: '14px'
+}
+
+};
+
   return (
-    <div style={{ flex: 0.7, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ padding: '10px', background: '#282c34', color: '#fff', display: 'flex', gap: '10px' }}>
-        <select value={language} onChange={(e) => setLanguage(e.target.value)}>
-          <option value="javascript">JavaScript</option>
-          <option value="python">Python</option>
-          <option value="java">Java</option>
-          <option value="cpp">C++</option>
-        </select>
-        <button onClick={saveCode}>Save</button>
-        <button onClick={runCode}>Run Code</button>
-      </div>
+    <div style={styles.editorContainer}>
+       <div style={styles.topBar}>
+
+    <div style={styles.leftControls}>
+
+      <select
+        value={language}
+        onChange={(e) => setLanguage(e.target.value)}
+        style={styles.select}
+      >
+        <option value="javascript">JavaScript</option>
+        <option value="python">Python</option>
+        <option value="java">Java</option>
+        <option value="cpp">C++</option>
+      </select>
+
+    </div>
+
+    <div style={styles.rightControls}>
+
+      <button
+        onClick={saveCode}
+        style={styles.saveButton}
+      >
+        Save
+      </button>
+
+      <button
+        onClick={runCode}
+        style={styles.runButton}
+      >
+        ▶ Run Code
+      </button>
+
+    </div>
+
+  </div>
       
-      <div style={{ flex: 1 }}>
+      <div style={styles.editorWrapper}>
         <Editor
           height="100%"
           theme="vs-dark"
@@ -107,10 +325,20 @@ export default function CodeEditor({ socketRef, roomId }) {
       </div>
 
       {/* Output Terminal */}
-      <div style={{ height: '200px', background: '#1e1e1e', color: '#00ff00', padding: '10px', borderTop: '1px solid #333' }}>
-        <h4>Output:</h4>
-        <pre>{output}</pre>
-      </div>
+      <div style={styles.outputContainer}>
+
+      <h4 style={styles.outputTitle}>
+        Output
+      </h4>
+
+      <pre style={styles.outputText}>
+        {output}
+      </pre>
+
     </div>
-  );
-}
+
+    </div>
+    );
+  
+} 
+// import

@@ -15,17 +15,21 @@ export default function Chat({ socketRef, roomId, username }) {
   }, [messages]);
 
   useEffect(() => {
-    if (socketRef.current) {
-      socketRef.current.on('receive-message', ({ username: sender, message: text }) => {
+    const handleReceiveMessage = ({ username: sender, message: text }) => {
+      if (sender !== username) {
         setMessages((prev) => [...prev, { sender, text }]);
-      });
+      }
+    };
+
+    if (socketRef.current) {
+      socketRef.current.on('receive-message', handleReceiveMessage);
     }
     return () => {
       if (socketRef.current) {
-        socketRef.current.off('receive-message');
+        socketRef.current.off('receive-message', handleReceiveMessage);
       }
     };
-  }, [socketRef]);
+  }, [socketRef, username]);
 
   const sendMessage = (e) => {
     e.preventDefault();
