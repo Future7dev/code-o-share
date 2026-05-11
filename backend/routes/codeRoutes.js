@@ -36,4 +36,21 @@ router.get('/get-code/:username', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+router.delete('/delete-code/:id', async (req, res) => {
+
+  try {
+    const { id } = req.params;
+    const codeDoc = await Code.findByIdAndDelete(id);
+    
+    if (codeDoc) {
+      res.status(200).json({ message: 'Code deleted successfully' });
+    } else {
+      res.status(404).json({ message: 'Code not found' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 module.exports = router;

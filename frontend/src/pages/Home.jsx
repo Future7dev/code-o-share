@@ -44,6 +44,19 @@ export default function Home() {
   const joinSavedRoom = (item) => {
     navigate(`/room/${item.roomId}`, { state: { username: user?.name || 'Guest', code: item.code } });
   };
+  const deleteSavedCode = (id) => {
+    axios.delete(`http://localhost:5000/api/code/delete-code/${id}`)
+      .then((response) => {
+        console.log('Code deleted successfully:', response.data);
+        toast.success('Code deleted successfully!');
+        setSavedCodes((prev) => prev.filter((code) => code._id !== id));
+      })
+      .catch((error) => {
+        console.error('Failed to delete code:', error);
+        toast.error('Failed to delete code');
+      });
+  };
+
 
   return (
     <div style={styles.pageContainer}>
@@ -85,11 +98,25 @@ export default function Home() {
 
       {/* Saved Code Corner */}
       <div style={styles.sidebar}>
-        <h3 style={styles.sidebarTitle}>Saved Codes Corner</h3>
+        <h3 style={styles.sidebarTitle}>Saved Codes</h3>
         <div style={styles.savedCodesList}>
           {Array.isArray(savedCodes) && savedCodes.length > 0 ? (
             savedCodes.map((item, index) => (
               <div key={item._id || index} style={styles.savedItem} onClick={() => joinSavedRoom(item)}>
+                <button
+                  style={styles.deleteButton}
+
+                  onClick={(e) => {
+
+                    e.stopPropagation();
+
+                    deleteSavedCode(item._id);
+
+                  }}
+                >
+                  ✕
+                </button>
+
                 <div style={styles.savedItemHeader}>Room: {item.roomId}</div>
                 <div style={styles.savedItemDate}>
                   {new Date(item.updatedAt || item.createdAt || Date.now()).toLocaleString()}
@@ -257,5 +284,37 @@ const styles = {
   savedItemDate: {
     fontSize: '12px',
     color: '#a0a0a0'
-  }
+  },
+  deleteButton: {
+  position: 'relative',
+
+  left: "240px",
+  width: '28px',
+
+  height: '28px',
+
+  border: 'none',
+
+  borderRadius: '50%',
+
+  background: '#ef4444',
+
+  color: '#fff',
+
+  cursor: 'pointer',
+
+  fontSize: '14px',
+
+  fontWeight: 'bold',
+
+  display: 'flex',
+
+  alignItems: 'center',
+
+  justifyContent: 'center',
+
+  transition: 'all 0.2s ease',
+
+  boxShadow: '0 2px 8px rgba(239,68,68,0.4)'
+},
 };

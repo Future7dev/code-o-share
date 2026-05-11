@@ -170,6 +170,11 @@ export default function CodeEditor({ socketRef, roomId, username, onLeaveRoom, i
     setOutput("Execution Error");
   }
 };
+const copyRoomId = () => {
+  navigator.clipboard.writeText(roomId)
+    .then(() => toast.success('Room ID copied to clipboard!'))
+    .catch(() => toast.error('Failed to copy Room ID.'));
+}
 
 const styles = {
 
@@ -181,6 +186,49 @@ const styles = {
     background: '#1e1e1e',
     overflow: 'hidden'
   },
+  roomSection: {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+
+  padding: '8px 12px',
+
+  background: '#1e1e1e',
+
+  border: '1px solid #333',
+
+  borderRadius: '10px'
+},
+
+roomText: {
+  color: '#fff',
+
+  fontSize: '14px',
+
+  fontWeight: '500'
+},
+
+copyButton: {
+  padding: '6px 12px',
+
+  border: 'none',
+
+  borderRadius: '8px',
+
+  background: '#9333ea',
+
+  color: '#fff',
+
+  cursor: 'pointer',
+
+  fontWeight: '600',
+
+  fontSize: '13px',
+
+  transition: 'all 0.2s ease',
+
+  boxShadow: '0 2px 8px rgba(147,51,234,0.4)'
+},
 
   // ================= TOP BAR =================
 
@@ -406,8 +454,21 @@ outputText: {
 
     </div>
 
-    <div style={styles.rightControls}>
+        <div style={styles.rightControls}>
+          <div style={styles.roomSection}>
 
+      <span style={styles.roomText}>
+        Room: {roomId}
+      </span>
+
+      <button
+        onClick={copyRoomId}
+        style={styles.copyButton}
+      >
+        📋 Copy
+      </button>
+
+    </div>
       <button
         onClick={saveCode}
         style={styles.saveButton}
