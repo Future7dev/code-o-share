@@ -14,7 +14,7 @@ export default function Room() {
   const [isSocketReady, setIsSocketReady] = useState(false);
 
   // Optional: Redirect if no username is found in location state
-  if (!location.state) return <Navigate to="/" />;
+  if (!location.state) return <Navigate to="/home" />;
 
   useEffect(() => {
     const initSocket = async () => {
@@ -37,7 +37,7 @@ export default function Room() {
 
       function handleErrors(e) {
         toast.error('Socket connection failed, try again later.');
-        navigate('/');
+        navigate('/home');
       }
 
       socketRef.current.emit('join-room', {
@@ -61,7 +61,7 @@ export default function Room() {
   }, [roomId, location.state?.username, navigate]);
   
   const handleLeaveRoom = () => {
-    navigate('/');
+    navigate('/home');
   };
 
   return (

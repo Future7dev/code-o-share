@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import PixelBlast from '../components/PixelBlast'; // Adjust the import path if Shadcn placed it elsewhere
 
 export default function Signup() {
   const [name, setName] = useState('');
@@ -26,6 +27,30 @@ export default function Signup() {
 
   return (
     <div style={styles.pageContainer}>
+      <div style={{
+                position: "fixed", inset: 0, zIndex: 0,
+               
+              }}>
+                <PixelBlast
+                  variant="square"
+                  pixelSize={4}
+                  color="#ece2f5"
+                  patternScale={2}
+                  patternDensity={1}
+                  pixelSizeJitter={0}
+                  enableRipples
+                  rippleSpeed={0.4}
+                  rippleThickness={0.12}
+                  rippleIntensityScale={1.5}
+                  liquid={false}
+                  liquidStrength={0.12}
+                  liquidRadius={1.2}
+                  liquidWobbleSpeed={5}
+                  speed={0.5}
+                  edgeFade={0.25}
+                  transparent
+                />
+              </div>
       <div style={styles.card}>
         <div style={styles.header}>
           <h2 style={styles.title}>Create an Account</h2>
@@ -79,6 +104,8 @@ const styles = {
     color: '#fff'
   },
   card: {
+    zIndex: 1,
+    position: 'relative',
     backgroundColor: '#1e1e1e',
     padding: '40px',
     borderRadius: '10px',

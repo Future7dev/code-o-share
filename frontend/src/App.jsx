@@ -5,6 +5,8 @@ import Home from './pages/Home';
 import Room from './pages/Room';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+
+import CodeSyncLanding from './pages/CodeSyncLanding';
 import './App.css'
 
 function App() {
@@ -13,7 +15,8 @@ function App() {
       <AuthProvider>
         <Toaster position="top-right" />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<CodeSyncLanding />} />
+          <Route path="/home" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/room/:roomId" element={<Room />} />
