@@ -16,7 +16,7 @@ export default function Home() {
   useEffect(() => {
     if (user?.name) {
       // Connect this to your future backend API to fetch saved codes
-      axios.get(`http://localhost:5000/api/code/get-code/${user.name}`)
+      axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/code/get-code/${user.name}`)
         .then((response) => {
           console.log('Fetched saved codes:', response.data);
           const fetchedCodes = response.data?.codes || response.data;
@@ -47,7 +47,7 @@ export default function Home() {
     navigate(`/room/${item.roomId}`, { state: { username: user?.name || 'Guest', code: item.code } });
   };
   const deleteSavedCode = (id) => {
-    axios.delete(`http://localhost:5000/api/code/delete-code/${id}`)
+    axios.delete(`${import.meta.env.VITE_BACKEND_URL}/api/code/delete-code/${id}`)
       .then((response) => {
         console.log('Code deleted successfully:', response.data);
         toast.success('Code deleted successfully!');

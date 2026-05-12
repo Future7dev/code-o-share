@@ -16,7 +16,7 @@ export default function Signup() {
     e.preventDefault();
     try {
       // Connect this to your future backend
-      const response = await axios.post('http://localhost:5000/api/auth/signup', { name, email, password });
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/signup`, { name, email, password });
       login(response.data.user);
       toast.success('Account created successfully!');
       navigate('/login');

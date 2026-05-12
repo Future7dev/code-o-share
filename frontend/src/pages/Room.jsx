@@ -18,7 +18,7 @@ export default function Room() {
 
   useEffect(() => {
     const initSocket = async () => {
-      socketRef.current = io('http://localhost:5000');
+      socketRef.current = io(import.meta.env.VITE_BACKEND_URL);
       setIsSocketReady(true);
 
       socketRef.current.on('connect_error', (err) => handleErrors(err));

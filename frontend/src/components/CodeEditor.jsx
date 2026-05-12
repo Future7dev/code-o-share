@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-
 export default function CodeEditor({ socketRef, roomId, username, onLeaveRoom, initialCode }) {
   const [code, setCode] = useState(initialCode || '// Write your code here');
   const [language, setLanguage] = useState('javascript');
@@ -122,7 +121,7 @@ export default function CodeEditor({ socketRef, roomId, username, onLeaveRoom, i
   const saveCode = async () => {
     try {
       // Connect this to your future backend API
-      await axios.post('http://localhost:5000/api/code/save-code', { roomId, code, username });
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/code/save-code`, { roomId, code, username });
       toast.success('Code saved  successfully!');
     } catch (error) {
       toast.error('Failed to save code.');
@@ -150,7 +149,7 @@ export default function CodeEditor({ socketRef, roomId, username, onLeaveRoom, i
       {
         headers: {
           "Content-Type": "application/json",
-          "X-RapidAPI-Key": "043798940emsh81bd4b52a13e11fp122305jsn1f7b710ce565",
+          "X-RapidAPI-Key": import.meta.env.VITE_RAPID_API_KEY,
           "X-RapidAPI-Host": "judge029.p.rapidapi.com"
         }
       }
