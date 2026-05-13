@@ -9,6 +9,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -74,14 +75,19 @@ export default function Login() {
             required 
             style={styles.input}
           />
-          <input 
-            type="password" 
-            placeholder="Password" 
-            value={password} 
-            onChange={e => setPassword(e.target.value)} 
-            required 
-            style={styles.input}
-          />
+          <div style={styles.passwordContainer}>
+            <input 
+              type={showPassword ? "text" : "password"} 
+              placeholder="Password" 
+              value={password} 
+              onChange={e => setPassword(e.target.value)} 
+              required 
+              style={styles.passwordInput}
+            />
+            <button type="button" onClick={() => setShowPassword(!showPassword)} style={styles.toggleButton}>
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
           <button type="submit" style={styles.button}>Login</button>
         </form>
         
@@ -154,6 +160,36 @@ const styles = {
     outline: 'none',
     transition: 'border 0.2s ease',
     boxSizing: 'border-box'
+  },
+  passwordContainer: {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    width: '100%'
+  },
+  passwordInput: {
+    padding: '14px',
+    borderRadius: '6px',
+    border: '1px solid #3c3c3c',
+    backgroundColor: '#2d2d2d',
+    color: '#fff',
+    fontSize: '15px',
+    outline: 'none',
+    transition: 'border 0.2s ease',
+    boxSizing: 'border-box',
+    width: '100%',
+    paddingRight: '60px'
+  },
+  toggleButton: {
+    position: 'absolute',
+    right: '10px',
+    background: 'none',
+    border: 'none',
+    color: '#a0a0a0',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '500',
+    padding: '0 5px'
   },
   button: {
     padding: '14px',
