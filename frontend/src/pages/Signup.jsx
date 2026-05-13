@@ -4,16 +4,19 @@ import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import PixelBlast from '../components/PixelBlast'; // Adjust the import path if Shadcn placed it elsewhere
+import Loader from '../components/Loader';
 
 export default function Signup() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       // Connect this to your future backend
       const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/signup`, { name, email, password });
@@ -22,11 +25,18 @@ export default function Signup() {
       navigate('/login');
     } catch (error) {
       toast.error('Signup failed!');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div style={styles.pageContainer}>
+      {isLoading && (
+        <div style={styles.overlay}>
+          <Loader />
+        </div>
+      )}
       <div style={{
                 position: "fixed", inset: 0, zIndex: 0,
                
@@ -102,6 +112,17 @@ const styles = {
     backgroundColor: '#121212',
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
     color: '#fff'
+  },
+  overlay: {
+    position: 'fixed',
+    inset: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backdropFilter: 'blur(2px)',
+    WebkitBackdropFilter: 'blur(2px)',
+    zIndex: 9999,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   card: {
     zIndex: 1,
