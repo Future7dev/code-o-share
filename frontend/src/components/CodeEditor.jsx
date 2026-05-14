@@ -129,46 +129,51 @@ export default function CodeEditor({ socketRef, roomId, username, onLeaveRoom, i
   };
 
   const runCode = async () => {
-  const languageIds = {
-    javascript: 63,
-    python: 71,
-    java: 62,
-    cpp: 54
-  };
+    const fileExtensions = {
+      javascript: 'js',
+      python: 'py',
+      java: 'java',
+      cpp: 'cpp'
+    };
 
-  try {
-    setOutput("Executing...");
+    try {
+      setOutput("Executing...");
 
-    const response = await axios.post(
-      "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true",
-      {
-        source_code: code,
-        language_id: languageIds[language],
-        stdin: ""
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "X-RapidAPI-Key": import.meta.env.VITE_RAPID_API_KEY,
-          "X-RapidAPI-Host": "judge029.p.rapidapi.com"
+      const response = await axios.post(
+        "https://onecompiler-apis.p.rapidapi.com/api/v1/run",
+        {
+          language: language,
+          stdin: "",
+          files: [
+            {
+              name: language === 'java' ? 'Main.java' : `index.${fileExtensions[language] || 'txt'}`,
+              content: code
+            }
+          ]
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "X-RapidAPI-Key": "043798940emsh81bd4b52a13e11fp122305jsn1f7b710ce565",
+            "X-RapidAPI-Host": "onecompiler-apis.p.rapidapi.com"
+          }
         }
-      }
-    );
+      );
 
-    const result = response.data;
+      const result = response.data;
 
-    setOutput(
-      result.stdout ||
-      result.stderr ||
-      result.compile_output ||
-      "No Output"
-    );
+      setOutput(
+        result.stdout ||
+        result.stderr ||
+        result.exception ||
+        "No Output"
+      );
 
-  } catch (error) {
-    console.error(error);
-    setOutput("Execution Error");
-  }
-};
+    } catch (error) {
+      console.error(error);
+      setOutput("Execution Error: " + (error.response?.data?.message || error.message));
+    }
+  };
 const copyRoomId = () => {
   navigator.clipboard.writeText(roomId)
     .then(() => toast.success('Room ID copied to clipboard!'))
